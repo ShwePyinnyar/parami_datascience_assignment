@@ -18,10 +18,10 @@ df = df.drop(['Capture_Rate', 'Base_Happiness', 'Is_Baby', 'Egg_Cycles', 'Past_T
 # ------------------------
 st.sidebar.header("Filter Options")
 
-primary_type = ["All"] + sorted(df['Type_1'].unique()).tolist()
+primary_type = ["All"] + sorted(df['Type_1'].unique())
 selected_primary_type = st.sidebar.selectbox("Select Primary Type", primary_type, index=0)
 
-secondary_type = ["All"] + sorted(df['Type_2'].unique()).tolist()
+secondary_type = ["All"] + sorted(df['Type_2'].unique())
 selected_secondary_type = st.sidebar.selectbox("Select Secondary Type", secondary_type, index=0)
 
 legendary = ["All"] + df['Is_Legendary'].unique().tolist()
@@ -111,6 +111,7 @@ st.plotly_chart(fig_bar)
 # ------------------------
 with st.expander("View Filtered Data"):
     st.dataframe(filtered_df)
+
 
 
 
