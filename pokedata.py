@@ -11,7 +11,7 @@ st.title("Gen 1-9 Pokemon Stats Interactive Dashboard")
 # Load Data
 # ------------------------
 df = pd.read_csv("pokedata.csv")
-df = df.drop[['Capture_Rate', 'Base_Happiness', 'Is_Baby', 'Egg_Cycles', 'Past_Type']]
+df = df.drop(['Capture_Rate', 'Base_Happiness', 'Is_Baby', 'Egg_Cycles', 'Past_Type'], axis=1)
 
 # ------------------------
 # Sidebar Filters
@@ -111,6 +111,7 @@ st.plotly_chart(fig_bar)
 # ------------------------
 with st.expander("View Filtered Data"):
     st.dataframe(filtered_df)
+
 
 
 
