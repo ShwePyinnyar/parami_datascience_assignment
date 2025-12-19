@@ -30,33 +30,31 @@ selected_legendary = st.sidebar.selectbox("Select Legendary or not", legendary, 
 mythical = ["All"] + df['Is_Mythical'].unique().tolist()
 selected_mythical = st.sidebar.selectbox("Select Mythical or not", mythical, index=0)
 
-genetation = ["All"] + df['Generation'].unique().tolist()
-selected_genetation = st.sidebar.selectbox("Select Generation", genetation, index=0)
-
+generation = ["All"] + df['Generation'].unique().tolist()
+selected_generation = st.sidebar.selectbox("Select Generation", generation, index=0)
 
 # ------------------------
 # Apply Filters
 # ------------------------
 filtered_df = df.copy()
 
-if primary_type != "All":
-    filtered_df = filtered_df[filtered_df['Type_1'] == primary_type]
-if secondary_type != "All":
-    filtered_df = filtered_df[filtered_df['Type_2'] == secondary_type]
-if legendary != "All":
-    filtered_df = filtered_df[filtered_df['Is_Legendary'] == legendary]
-if mythical != "All":
-    filtered_df = filtered_df[filtered_df['Is_Mythical'] == mythical]
-if genetation != "All":
-    filtered_df = filtered_df[filtered_df['Generation'] == genetation]
-
+if selected_primary_type != "All":
+    filtered_df = filtered_df[filtered_df['Type_1'] == selected_primary_type]
+if selected_secondary_type != "All":
+    filtered_df = filtered_df[filtered_df['Type_2'] == selected_secondary_type]
+if selected_legendary != "All":
+    filtered_df = filtered_df[filtered_df['Is_Legendary'] == selected_legendary]
+if selected_mythical != "All":
+    filtered_df = filtered_df[filtered_df['Is_Mythical'] == selected_mythical]
+if selected_generation != "All":
+    filtered_df = filtered_df[filtered_df['Generation'] == selected_generation]
 
 # ------------------------
 # KPI Metrics
 # ------------------------
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("Total Pokemons", f"${filtered_df['id'].count()}")
+col1.metric("Total Pokemons", f"{filtered_df['id'].count()}")
 col2.metric("Average Height(m)", f"{filtered_df['Height(m)'].mean():.2f}")
 col3.metric("Average Weight(kg)", f"{filtered_df['Weight{kg}'].mean():.2f}")
 col4.metric("Average Stats Total", f"{filtered_df['Total_Stats'].mean():.2f}")
@@ -69,11 +67,9 @@ st.markdown("---")
 st.subheader("📊 Descriptive Statistics")
 st.dataframe(filtered_df[['HP','Attack','Defense','Sp.Atk','Sp.Def','Speed','Total_Stats']].describe().T)
 
-
 # ------------------------
 # Correlation Heatmap
 # ------------------------
-
 col1, = st.columns(1)
 with col1:
     # ------------------------
@@ -81,28 +77,43 @@ with col1:
     # ------------------------
     st.subheader("Type and Restrited heatmap")
 
+    filtered_df = filtered_df.copy()  # ensure safe copy for assignment
     filtered_df['Restricted'] = (
-    (filtered_df['Is_Legendary'] == True) |
-    (filtered_df['Is_Mythical'] == True) |
-    (filtered_df['Is_Pseudo_Legendary'] == True)
+        filtered_df['Is_Legendary'] |
+        filtered_df['Is_Mythical'] |
+        filtered_df['Is_Pseudo_Legendary']
     )
+
     type1 = filtered_df[['Type_1', 'Restricted', 'id']].rename(columns={'Type_1': 'Type'})
     type2 = filtered_df[['Type_2', 'Restricted', 'id']].rename(columns={'Type_2': 'Type'})
     types_combined = pd.concat([type1, type2], ignore_index=True)
     types_combined = types_combined.dropna(subset=['Type'])
 
     heatmap_data = types_combined.groupby(['Type','Restricted']).size().reset_index(name='Count')
-    heatmap_matrix = ( heatmap_data.set_index(['Type', 'Restricted'])['Count'].unstack(fill_value=0))
-    fig_heatmap = px.imshow(heatmap_matrix, text_auto=True, color_continuous_scale='Blues', labels=dict( x="Restricted", y="Type", color="Pokémon Count"), title="Pokémon Type vs Restricted Status")
+    heatmap_matrix = heatmap_data.set_index(['Type','Restricted'])['Count'].unstack(fill_value=0).sort_index()
+    fig_heatmap = px.imshow(
+        heatmap_matrix,
+        text_auto=True,
+        color_continuous_scale='Blues',
+        labels=dict(x="Restricted", y="Type", color="Pokémon Count"),
+        title="Pokémon Type vs Restricted Status"
+    )
 
     st.plotly_chart(fig_heatmap)
-    
+
 # ------------------------
 # Total Sales Bar Chart by Product Line
 # ------------------------
 st.subheader("Total Pokemon per Type")
 pokemon_per_type = types_combined.groupby("Type").size().reset_index(name='Total_Pokemon')
-fig_bar = px.bar(pokemon_per_type, x="Type", y="Total_Pokemon", color="Type", text="Total_Pokemon", title="Total Pokemon per Type")
+fig_bar = px.bar(
+    pokemon_per_type,
+    x="Type",
+    y="Total_Pokemon",
+    color="Type",
+    text="Total_Pokemon",
+    title="Total Pokemon per Type"
+)
 fig_bar.update_layout(showlegend=False)
 st.plotly_chart(fig_bar)
 
@@ -111,33 +122,3 @@ st.plotly_chart(fig_bar)
 # ------------------------
 with st.expander("View Filtered Data"):
     st.dataframe(filtered_df)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
